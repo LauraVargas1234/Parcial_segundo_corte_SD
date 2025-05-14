@@ -12,11 +12,9 @@ logger = logging.getLogger(__name__)
 RABBITMQ_CREDS = pika.PlainCredentials('laura', '123')
 
 def generate_short_id():
-    """Genera un ID numérico de 6 dígitos"""
     return str(random.randint(100000, 999999))
 
 def get_rabbitmq_channel():
-    """Obtiene canal RabbitMQ con manejo de errores"""
     try:
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(
@@ -84,7 +82,6 @@ def process_task(ch, method, properties, body):
     logger.info(f"Completado {file_id} en {queue_name}")
 
 def connect_rabbitmq():
-    """Establece conexión con RabbitMQ con reintentos"""
     max_retries = 5
     retry_delay = 5
     

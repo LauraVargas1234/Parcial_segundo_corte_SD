@@ -1,0 +1,42 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  worker:
+    build: ./worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      replicas: 3
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: laura
+      RABBITMQ_DEFAULT_PASS: 123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: |
+        rabbitmq-diagnostics -q check_running && \
+        rabbitmq-diagnostics -q check_local_alarms
+      interval: 10s
+      timeout: 30s
+      retries: 5
+
+volumes:
+  rabbitmq_data:
